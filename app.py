@@ -138,13 +138,14 @@ def add_table():
     table_info = sql.listTables(credentials) # nested dict
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
-
-    return render_template('dashboard.html', nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
+    database_loaded = session.get('database_loaded', False)
+    return render_template('dashboard.html', nativeTables=nativeTables, database_loaded=database_loaded,junctionTables=junctionTables, logs=session.get('logs', []))
 
 
 @app.route('/sync_tables', methods=['POST'])
 @login_required
 def sync_tables():
+    database_loaded = session.get('database_loaded', False)
     session['syncing'] = True
     credentials = session.get('credentials', {})
     tables_to_sync = request.form.getlist('tables_to_sync')
@@ -156,11 +157,12 @@ def sync_tables():
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
 
-    return render_template('dashboard.html', nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []), task_id=task.id, syncing=True)
+    return render_template('dashboard.html', database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []), task_id=task.id, syncing=True)
 
 @app.route('/delete_tables', methods=['POST'])
 @login_required
 def delete_tables():
+    database_loaded = session.get('database_loaded', False)
     table_names = request.form.getlist('tables_to_delete')
     credentials = session.get('credentials', {})
     try:
@@ -175,11 +177,12 @@ def delete_tables():
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
 
-    return render_template('dashboard.html', nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
+    return render_template('dashboard.html', database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
 
 @app.route('/clear_tables', methods=['POST'])
 @login_required
 def clear_tables():
+    database_loaded = session.get('database_loaded', False)
     table_names = request.form.getlist('tables_to_clear')
     credentials = session.get('credentials', {})
     try:
@@ -194,7 +197,7 @@ def clear_tables():
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
 
-    return render_template('dashboard.html', nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
+    return render_template('dashboard.html', database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
 
 
 
