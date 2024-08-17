@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="3;url={{ url_for('home') }}">
+    <title>exeunt</title>
+</head>
+<body>
+    <p id="typing-text"></p>
+    <script>
+        const text = "i tried to warn you.";
+        let i = 0;
+
+        function typeText() {
+            if (i < text.length) {
+                document.getElementById("typing-text").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(typeText, 50); // Adjust typing speed here (50ms per character)
+            } else {
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('home') }}";
+                }, 100); // Adjust the delay to match the length of the typing effect (1 second here)
+            }
+        }
+        window.onload = typeText;
+    </script>
+</body>
+</html>

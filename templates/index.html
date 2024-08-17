@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>lleh</title>
+    <style>
+        #ascii-art {
+            white-space: pre-wrap; /* Preserve whitespace formatting */
+            font-family: monospace;
+            font-size: 14px;
+            text-align: left;
+            margin: 20px;
+        }
+        a {
+            text-decoration: none;
+            cursor: default;
+            color: inherit;
+        }
+        a:hover {
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+    <a href="/yewhoenterhere"><div id="ascii-art"></div></a>
+
+    <script>
+        async function fetchArt() {
+            const response = await fetch('/art');
+            const artList = await response.json();
+            return artList;
+        }
+
+        function rotateArt(artList) {
+            const artElement = document.getElementById('ascii-art');
+            let currentIndex = 0;
+
+            function showNextArt() {
+                artElement.innerHTML = artList[currentIndex]; // Use innerHTML to render <pre> tags
+                currentIndex = (currentIndex + 1) % artList.length;
+            }
+
+            showNextArt(); // Show the first picture immediately
+            setInterval(showNextArt, 3000); // Switch every 3 seconds
+        }
+
+        fetchArt().then(rotateArt);
+    </script>
+
+    
+</body>
+</html>

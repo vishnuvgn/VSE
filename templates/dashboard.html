@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>abandonallhope</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: row;
+        }
+        .log-section {
+            width: 300px;
+            border-right: 1px solid #ccc;
+            padding-right: 20px;
+            height: 80vh;
+            overflow-y: auto;
+        }
+        .log-section h2 {
+            margin-top: 0;
+        }
+        .log-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
+        .log-entry {
+            background-color: #e0e0e0;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin-left: 20px;
+        }
+        .main-section {
+            flex: 1;
+        }
+        .side-sections {
+            margin-left: 20px;
+            width: 300px;
+        }
+        .side-sections section {
+            margin-bottom: 20
+        }
+    </style>
+    <script>
+        function addRow() {
+            const container = document.getElementById('tableUrlContainer');
+            const row = document.createElement('div');
+            row.className = 'row';
+            row.innerHTML = `
+                <input type="text" name="tableNames" placeholder="Table Name" required>
+                <input type="text" name="tableFields" placeholder="Table Fields" required>
+                <button type="button" onclick="removeRow(this)">-</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeRow(button) {
+            const row = button.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+    </script>
+</head>
+<body>
+    <!-- Action Log Section -->
+    <div class="log-section">
+        <h2>Action Log</h2>
+        <div id="logContainer" class="log-container">
+            {% for log in logs %}
+            <div class="log-entry">{{ log }}</div>
+            {% endfor %}        
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Main Section for Add Tables and List of Tables -->
+        <div class="main-section">
+            <h1>abandonallhope</h1>
+
+            <!-- Database Credentials Form -->
+            <section>
+                <h2>Enter Database Credentials</h2>
+                <form method="POST" action="/load_database">
+                    <div class="form-group">
+                        <label for="host">Host:</label>
+                        <input type="text" id="host" name="host" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="database">Database:</label>
+                        <input type="text" id="database" name="database" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="user">User:</label>
+                        <input type="text" id="user" name="user" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="schema">Schema:</label>
+                        <input type="text" id="schema" name="schema" required>
+                    </div>
+            
+                    <button type="submit">Load Database</button>
+                </form>
+            </section>
+            
+
+            <section>
+                <h2>Database Status</h2>
+                {% if database_loaded %}
+                    <p>Database Name: {{ database.databaseName }}</p>
+                    <p>User: {{ database.user }}</p>
+                {% else %}
+                    <p>No DB selected. Please load the database first.</p>
+                {% endif %}
+            </section>
+
+            <!-- Form to Add Tables to Syncing Process -->
+            <section>
+                <h2>Add Tables to Sync</h2>
+                <form method="POST" action="/add_table">
+                    <div class="form-group">
+                        <label for="baseId">base id:</label>
+                        <input type="text" id="baseId" name="baseId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="ATPAT">airtable personal access token</label>
+                        <input type="text" id="ATPAT" name="ATPAT" required>
+                    </div>
+
+                    <div id="tableUrlContainer">
+                        <div class="row">
+                            <input type="text" name="tableNames" placeholder="table name" required>
+                            <input type="text" name="tableFields" placeholder="sync fields, comma separated" required>
+                            <button type="button" onclick="addRow()">+</button>
+                        </div>
+                    </div>
+
+                    <br>
+                    <button type="submit">Add to Sync</button>
+                </form>
+            </section>
+
+            <!-- List of Tables and Row Counts -->
+            <section>
+                <h2>Current Tables in Database</h2>
+                <ul>
+                    {% if nativeTables or junctionTables %}
+                        {% for table in nativeTables+junctionTables %}
+                            <li>{{ table.name }} - last updated: {{ table.last_update_time }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li>No tables available.</li>
+                    {% endif %}
+                </ul>
+            </section>
+
+            
+        </div>
+
+        <!-- Side Sections for Sync Tables and Delete Tables -->
+        <div class="side-sections">
+            <!-- Sync Tables -->
+            <section>
+                <h2>Sync Tables</h2>
+                <form method="POST" action="/sync_tables">
+                    {% if nativeTables %}
+                        {% for table in nativeTables %}
+                            <input type="checkbox" id="{{ table.name }}_sync" name="tables_to_sync" value="{{ table.name }}">
+                            <label for="{{ table.name }}_sync">{{ table.name }}</label><br>
+                        {% endfor %}
+                    {% else %}
+                        <p>No airtables available to sync.</p>
+                    {% endif %}
+                    <br>
+                    <button type="submit" {% if not nativeTables %}disabled{% endif %}>Sync Selected Tables</button>
+                </form>
+            </section>
+
+            <!-- Delete Tables -->
+            <section>
+                <h2>Delete Tables</h2>
+                <form method="POST" action="/delete_tables">
+                    {% if nativeTables or junctionTables %}
+                        {% for table in nativeTables+junctionTables %}
+                            <input type="checkbox" id="{{ table.name }}_delete" name="tables_to_delete" value="{{ table.name }}">
+                            <label for="{{ table.name }}_delete">{{ table.name }}</label><br>
+                        {% endfor %}
+                    {% else %}
+                        <p>No tables available to delete.</p>
+                    {% endif %}
+                    <br>
+                    <button type="submit" {% if not nativeTables or junctionTables %}disabled{% endif %}>Delete Selected Tables</button>
+                </form>
+            </section>
+            <!-- Clear Tables Section -->
+            <section>
+                <h2>Clear Tables</h2>
+                <form method="POST" action="/clear_tables">
+                    {% if nativeTables or junctionTables %}
+                        {% for table in nativeTables+junctionTables %}
+                            <input type="checkbox" id="{{ table.name }}_clear" name="tables_to_clear" value="{{ table.name }}">
+                            <label for="{{ table.name }}_clear">{{ table.name }}</label><br>
+                        {% endfor %}
+                    {% else %}
+                        <p>No tables available to clear</p>
+                    {% endif %}
+                    <br>
+                    <button type="submit" {% if not nativeTables or junctionTables %}disabled{% endif %}>Clear Selected Tables</button>
+                </form>
+            </section>
+            <!-- Task Status Section -->
+             {% if syncing %}
+                <div>
+                    <div id="task-status">Task Status: <span id="status">Pending...</span></div>
+                    <script>
+                        function pollTaskStatus(task_id) {
+                            fetch(`/task_status/${task_id}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    document.getElementById('status').innerText = data.status;
+                                    if (data.state === 'SUCCESS' || data.state === 'FAILURE') {
+                                        clearInterval(pollInterval);
+                                        // Reload the dashboard to reflect any updates
+                                        window.location.href = "{{ url_for('dashboard') }}";
+                                    }
+                                });
+                        }
+                    
+                        var task_id = "{{ task_id }}";
+                        if (task_id) {
+                            var pollInterval = setInterval(() => pollTaskStatus(task_id), 5000);
+                        }
+                    </script>
+                </div>
+            {% endif %}
+        </div>
+        <section><form method="GET" action="{{ url_for('logout') }}"><button type="submit">exeunt</button></form></section>
+        <br><br>
+        
+
+    </div>
+</body>
+</html>
