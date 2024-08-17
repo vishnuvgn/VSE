@@ -165,7 +165,7 @@ def delete_tables():
     credentials = session.get('credentials', {})
     try:
         for table in table_names:
-            sql.deleteTables(table, credentials)
+            sql.deleteTable(table, credentials)
     except Exception as e:
         add_log_entry(f'failed to delete tables, smth about: {e}')
         return render_template('dashboard.html', logs=session.get('logs', []))
@@ -184,7 +184,7 @@ def clear_tables():
     credentials = session.get('credentials', {})
     try:
         for table in table_names:
-            sql.deleteTables(table, credentials)
+            sql.clearTable(table, credentials)
     except Exception as e:
         add_log_entry(f'failed to clear tables, smth about: {e}')
         return render_template('dashboard.html', logs=session.get('logs', []))
