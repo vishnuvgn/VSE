@@ -6,7 +6,6 @@ away from the sync-consumer method, i shifted to a manual shift with the
 airtable api itself.
 
 
-holy fuck
 
 
 ## how to use:
