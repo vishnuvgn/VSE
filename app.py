@@ -177,7 +177,7 @@ def delete_tables():
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
 
-    return render_template('dashboard.html', database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
+    return render_template('dashboard.html', database=session.get('database', {}), database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
 
 @app.route('/clear_tables', methods=['POST'])
 @login_required
@@ -197,7 +197,7 @@ def clear_tables():
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
 
-    return render_template('dashboard.html', database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
+    return render_template('dashboard.html', database=session.get('database', None), database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
 
 
 
