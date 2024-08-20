@@ -139,7 +139,7 @@ def add_table():
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
     database_loaded = session.get('database_loaded', False)
-    return render_template('dashboard.html', nativeTables=nativeTables, database_loaded=database_loaded,junctionTables=junctionTables, logs=session.get('logs', []))
+    return render_template('dashboard.html', nativeTables=nativeTables, database=session.get('database', {}), database_loaded=database_loaded,junctionTables=junctionTables, logs=session.get('logs', []))
 
 
 @app.route('/sync_tables', methods=['POST'])
@@ -157,7 +157,7 @@ def sync_tables():
     nativeTables = table_info['nativeTables']
     junctionTables = table_info['junctionTables']
 
-    return render_template('dashboard.html', database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []), task_id=task.id, syncing=True)
+    return render_template('dashboard.html', database_loaded=database_loaded, database=session.get('database', {}), nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []), task_id=task.id, syncing=True)
 
 @app.route('/delete_tables', methods=['POST'])
 @login_required
@@ -170,7 +170,7 @@ def delete_tables():
             sql.deleteTable(table, credentials)
     except Exception as e:
         add_log_entry(f'failed to delete tables, smth about: {e}')
-        return render_template('dashboard.html', logs=session.get('logs', []))
+        return render_template('dashboard.html', database_loaded=database_loaded, database=session.get('database',{}), logs=session.get('logs', []))
     
     add_log_entry('tables deleted successfully')
     table_info = sql.listTables(credentials)
@@ -198,8 +198,6 @@ def clear_tables():
     junctionTables = table_info['junctionTables']
 
     return render_template('dashboard.html', database=session.get('database', None), database_loaded=database_loaded, nativeTables=nativeTables, junctionTables=junctionTables, logs=session.get('logs', []))
-
-
 
 
 @app.route('/task_status/<task_id>')
@@ -237,5 +235,5 @@ def logout():
     return render_template('logout.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-    # app.run(debug=True)
+    # app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
